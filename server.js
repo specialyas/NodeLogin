@@ -31,7 +31,31 @@ app.get('/users/dashboard/', (req, res) => {
 
 // post routes
 
+app.post('/users/register', (req, res) => {
+    let { name, email, password, password2} = req.body;
 
+    console.log({
+        name,
+        email,
+        password,
+        password2
+});
+
+let errors = [];
+
+if (!name || !email || !password || !password2){
+    errors.push({ message: "Please enter all fields"});
+}
+
+if (password.length < 6) {
+    errors.push({ message: "Password must be atleast 6 characters"});
+}
+
+if (errors.length > 0) {
+    res.render("register", { errors });
+}
+    
+})
 
 
 
