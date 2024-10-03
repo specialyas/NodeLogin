@@ -37,24 +37,24 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.get("/users/register", (req, res) => {
+app.get("/users/register", checkAuthenticated(false), (req, res) => {
   res.render("register");
 });
 
-app.get("/users/login", (req, res) => {
+app.get("/users/login", checkAuthenticated(false), (req, res) => {
   res.render("login");
 });
 
 app.get("/users/logout", (req, res, next) => {
-    req.logout((err) => {
-        if (err) {
-            return next(err); // Pass the error to the next middleware (error handler)
-        }
-        req.flash("success_msg", "Logout Successful!!!");
-        res.redirect("/users/login");
-    });
+  req.logout((err) => {
+    if (err) {
+      return next(err); // Pass the error to the next middleware (error handler)
+    }
+    req.flash("success_msg", "Logout Successful!!!");
+    res.redirect("/users/login");
+  });
 });
-app.get("/users/dashboard/", (req, res) => {
+app.get("/users/dashboard/", checkAuthenticated(true), (req, res) => {
   res.render("dashboard", { user: req.user.name });
 });
 
@@ -136,6 +136,37 @@ app.post(
     failureFlash: true,
   })
 );
+
+function checkAuthenticated(shouldBeAuthenticated) {
+  return function (req, res, next) {
+    if (shouldBeAuthenticated) {
+      // if the route requires authentication
+      if (req.isAuthenticated()) {
+        return next(); // proceed if authenticated
+      }
+      return res.redirect("/users/login"); // Redirect to login if not authenticated
+    } else {
+      // If the route should not be accessed by authenticated users
+      if (req.isAuthenticated()) {
+        return res.redirect("/users/dashboard"); // Redirect to dashboard if authenticated
+      }
+      return next(); // Proceed if not authenticated
+    }
+  };
+}
+
+/* function checkAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+   return res.redirect("/users/dashboard");
+  }
+  next();
+}
+function checkNotAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/users/login");
+} */
 app.listen(PORT, () => {
   console.log(`listening on PORT ${PORT}`);
 });
