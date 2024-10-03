@@ -45,6 +45,15 @@ app.get("/users/login", (req, res) => {
   res.render("login");
 });
 
+app.get("/users/logout", (req, res, next) => {
+    req.logout((err) => {
+        if (err) {
+            return next(err); // Pass the error to the next middleware (error handler)
+        }
+        req.flash("success_msg", "Logout Successful!!!");
+        res.redirect("/users/login");
+    });
+});
 app.get("/users/dashboard/", (req, res) => {
   res.render("dashboard", { user: req.user.name });
 });
